@@ -7,6 +7,7 @@ import (
 	"myApi/internal/config" // Поправь путь на свой модуль!
 	"myApi/internal/http-server/handlers/wallet"
 	"myApi/internal/storage/postgresql"
+	"myApi/internal/storage/redis"
 	"net/http"
 	"os"
 	"os/signal"
@@ -48,6 +49,13 @@ func main() {
 
 	log.Info("successfully connected to database")
 
+	cache, err := redis.New(cfg.RedisAddr)
+	if err != nil {
+		log.Error("failed to connect to redis", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	_ = cache
+	log.Info("successfully connected to redis")
 	// TODO: Здесь будет запуск HTTP-сервера
 	router := chi.NewRouter()
 

@@ -23,7 +23,17 @@ services:
       - DATABASE_URL=postgres://postgres:mysecretpassword@postgres:5432/billing?sslmode=disable
     depends_on:
       - postgres
+      - redis
     restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: billing-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+
 
 volumes:
   billing-data:

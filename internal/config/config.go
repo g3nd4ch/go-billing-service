@@ -9,7 +9,11 @@ import (
 )
 
 type Config struct {
-	Env        string `yaml:"env" env-default:"local"`
+	Env         string `yaml:"env" env-default:"local"`
+	StoragePath string `yaml:"storage_path" env-required:"true"`
+
+	RedisAddr string `yaml:"redis_addr" env-default:"localhost:6379"`
+
 	HTTPServer `yaml:"http_server"`
 }
 
