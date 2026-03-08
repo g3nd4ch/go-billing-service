@@ -1,0 +1,36 @@
+name: Go Backend CI
+
+# Когда запускать этого робота?
+on:
+  push:
+    branches: [ "main", "master" ] # При пуше в главную ветку
+  pull_request:
+    branches: [ "main", "master" ] # При создании Pull Request-а
+
+jobs:
+  build-and-lint:
+    # На какой операционке запускать сервер сборки
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. Скачиваем твой код из репозитория на сервер GitHub
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Устанавливаем язык Go (ту самую версию, что и у тебя)
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24.x'
+        cache: true # Включаем кэш, чтобы скачивалось за секунды
+
+    # 3. Запускаем наш любимый линтер
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        version: latest
+        args: --timeout=5m
+
+    # 4. Проверяем, что код вообще компилируется (не сломан синтаксис)
+    - name: Build project
+      run: go build -v ./...
