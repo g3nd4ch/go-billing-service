@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"myApi/internal/config" // Поправь путь на свой модуль!
 	"myApi/internal/http-server/handlers/wallet"
+	"myApi/internal/service"
 	"myApi/internal/storage/postgresql"
 	"myApi/internal/storage/redis"
 	"net/http"
@@ -54,9 +55,10 @@ func main() {
 		log.Error("failed to connect to redis", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	_ = cache
+
 	log.Info("successfully connected to redis")
 	// TODO: Здесь будет запуск HTTP-сервера
+	walletService := service.New(log, storage, cache)
 	router := chi.NewRouter()
 
 	// 2. Добавляем полезные Middleware (промежуточные слои)
@@ -67,10 +69,10 @@ func main() {
 	// 3. Регистрируем наши ручки (Endpoints)
 	// Вот она - магия интерфейсов! Мы передаем storage, и он работает как WalletCreator.
 	// Замени "myApi/internal/http-server/handlers/wallet" на свой путь, если IDE не импортирует сама!
-	router.Post("/api/v1/wallet", wallet.New(log, storage))
+	router.Post("/api/v1/wallet", wallet.New(log, walletService))
 	// {id} - это переменная пути. Роутер chi поймет, что вместо неё будет подставлен UUID
-	router.Get("/api/v1/wallet/{id}", wallet.Get(log, storage))
-	router.Post("/api/v1/wallet/transfer", wallet.Transfer(log, storage))
+	router.Get("/api/v1/wallet/{id}", wallet.Get(log, walletService))
+	router.Post("/api/v1/wallet/transfer", wallet.Transfer(log, walletService))
 
 	srv := &http.Server{
 		Addr:    cfg.Address,

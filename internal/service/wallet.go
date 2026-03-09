@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"myApi/internal/storage/postgresql"
 )
@@ -74,4 +75,22 @@ func (s *WalletService) GetWallet(ctx context.Context, walletID string) (*postgr
 	s.log.Info("cache miss", slog.String("wallet_id", walletID))
 	return wallet, nil
 	// 6. Залогируй "cache miss" и верни найденный в БД кошелек.
+}
+
+func (s *WalletService) Transfer(ctx context.Context, fromID, toID string, amount float64) error {
+	err := s.repo.Transfer(ctx, fromID, toID, amount)
+	if err != nil {
+		return fmt.Errorf("error to transfer : %w", err)
+	}
+
+	err = s.cache.DeleteWallet(ctx, fromID)
+	if err != nil {
+		s.log.Error("error delete wallet", slog.String("wallet_id", fromID))
+	}
+
+	err = s.cache.DeleteWallet(ctx, toID)
+	if err != nil {
+		s.log.Error("error delete wallet", slog.String("wallet_id", toID))
+	}
+	return nil
 }
