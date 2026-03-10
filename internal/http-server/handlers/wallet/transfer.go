@@ -55,3 +55,4 @@ func Transfer(log *slog.Logger, transferrer WalletTransferrer) http.HandlerFunc 
 		// (Тело ответа можно оставить пустым или вернуть {"status": "ok"})
 	}
 }
+
